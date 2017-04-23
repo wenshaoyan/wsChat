@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">chat</string>
+    <string name="text_login">登录</string>
+    <string name="text_login_running">正在登录</string>
+    <string name="text_search">搜索</string>
+    <string name="des_start_image">开机动画</string>
+    <string name="text_version_v1_0_0">v1.0.0</string>
+    <string name="text_contact">联系人</string>
+    <string name="text_add">添加</string>
+    <string name="text_new_friend">新朋友</string>
+    <string name="text_group_chat">群聊</string>
+    <string name="text_official_accounts">公众号</string>
+    <string name="text_triangle">小三角</string>
+    <string name="text_more">更多</string>
+    <string name="text_dynamic">动态</string>
+    <string name="text_message">消息</string>
+    <string name="text_personal_data">个人资料</string>
+    <string name="text_face">表情</string>
+    <string name="text_hold_down_talk">按住说话</string>
+    <string name="text_intercom">对讲</string>
+    <string name="text_huge_record">语音</string>
+    <string name="text_click_record">点击录音</string>
+    <string name="text_record">录音</string>
+    <string name="text_cancel">取消</string>
+    <string name="text_send">发送</string>
+</resources>

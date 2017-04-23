@@ -1,0 +1,91 @@
+<resources>
+    <style name="AppThemeParent" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@android:color/holo_red_light</item>
+
+    </style>
+
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <item name="colorPrimary">@color/colorPrimaryDark</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <!-- Base application theme. -->
+    <!--<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        &lt;!&ndash; Customize your theme here. &ndash;&gt;
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+
+    </style>-->
+   <!-- <style name="MyApp" parent="Theme.AppCompat.Light.DarkActionBar">
+        &lt;!&ndash; Customize your theme here. &ndash;&gt;
+        <item name="colorPrimary">@color/mainBack</item>
+        <item name="colorPrimaryDark">@color/mainBack</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>-->
+    <style name="IndexTheme" parent="AppThemeParent">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/defColorPrimary</item>
+        <item name="colorPrimaryDark">@color/defColorPrimary</item>
+        <item name="colorAccent">#1d139b</item>
+        <item name="actionBarSize">50dp</item>
+
+
+    </style>
+    <style name="shareDialog_style" parent="@android:style/Theme.Holo.DialogWhenLarge" />
+    <style name="LoginSimpleDialogTheme">
+        <item name="android:windowBackground">@android:color/transparent</item><!--背景透明-->
+        <item name="android:windowFrame">@null</item><!--边框-->
+        <item name="android:windowNoTitle">true</item><!--无标题-->
+        <item name="android:windowIsFloating">true</item><!--是否浮现在activity之上-->
+        <item name="android:windowIsTranslucent">true</item><!--半透明-->
+        <item name="android:windowContentOverlay">@null</item><!--内容覆盖 -->
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item><!-- 窗口样式Dialog -->
+        <item name="android:backgroundDimEnabled">true</item><!--模糊-->
+    </style>
+
+    <style name="FinalTheme" parent="Theme.AppCompat.Light.NoActionBar">
+
+    </style>
+    <style name="FinalTheme.Index">
+        <item name="gallery_toolbar_bg">@color/defColorPrimary</item>
+        <item name="gallery_toolbar_close_color">@color/whiteDark</item>
+        <item name="gallery_toolbar_text_color">@color/whiteDark</item>
+        <item name="gallery_toolbar_over_button_text_size">12sp</item>
+        <item name="gallery_toolbar_over_button_text_color">@color/whiteDark</item>
+        <item name="gallery_toolbar_over_button_pressed_color">@color/finalButtonPressed</item>
+        <item name="gallery_toolbar_over_button_normal_color">@color/finalButtonNormal</item>
+        <item name="gallery_page_bg">@color/whiteDark</item>
+        <item name="gallery_default_image">@mipmap/load_ing</item>
+        <item name="gallery_imageview_bg">#2f29ca</item>
+        <item name="gallery_checkbox_button_tint_color">@color/defColorPrimary</item>
+
+
+
+    </style>
+
+    <style name="DialogStyle" parent="@android:style/Theme.Holo.DialogWhenLarge">
+
+
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:backgroundDimAmount">0.2</item>
+
+    </style>
+    <style name="DialogStyleBak" parent="android:style/Theme.Dialog">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:backgroundDimAmount">0.2</item>
+
+    </style>
+
+</resources>

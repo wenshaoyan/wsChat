@@ -1,0 +1,43 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:riv_border_color="#333333"
+            app:riv_border_width="2dp"
+            app:riv_oval="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/rw_current_user_head"/>
+        <!--<TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="toolBar"
+            android:textColor="#9997a1"
+            android:textSize="18sp"
+            android:layout_marginRight="?attr/actionBarSize" />-->
+
+        <ImageButton
+            android:id="@+id/ib_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
+            android:src="@mipmap/ic_action_add"
+            android:background="@null"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+</RelativeLayout>

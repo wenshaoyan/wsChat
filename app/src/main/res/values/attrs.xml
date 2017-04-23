@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="textSize" format="dimension" />
+    <attr name="textColor" format="color" />
+    <declare-styleable name="DragBubbleView">
+        <attr name="bubbleRadius" format="dimension" />
+        <attr name="bubbleColor" format="color" />
+        <attr name="text" format="string" />
+        <attr name="textSize" />
+        <attr name="textColor" />
+
+    </declare-styleable>
+
+    <!--
+            max                 最大进度
+            startAngle             进度从圆环的哪个角度开始走
+            backColor             圆环内部的填充色
+            roundColor             圆环的颜色
+            roundProgressColor  圆环进度的颜色
+            roundWidth             圆环宽度
+            textColor             中心文字的颜色
+            textSize             中心文字的大小
+            textIsDisplayable     中心文字是否显示
+            src                   中心显示图片
+            style = 0/1          进度的风格，实心或者空心
+         -->
+    <declare-styleable name="CirclePlayProgress">
+        <attr name="max" format="integer" />
+        <attr name="startAngle" format="integer"/>
+        <attr name="backColor" format="color"/>
+        <attr name="roundColor" format="color"/>
+        <attr name="roundProgressColor" format="color"/>
+        <attr name="roundWidth" format="dimension"/>
+        <attr name="textColor"/>
+        <attr name="textSize"/>
+        <attr name="textIsDisplayable" format="boolean"/>
+        <attr name="src" format="reference" />
+        <attr name="type" >
+            <enum name="STROKE" value="0"/>
+            <enum name="FILL" value="1"/>
+        </attr>
+
+
+    </declare-styleable>
+
+</resources>
