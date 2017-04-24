@@ -112,6 +112,7 @@ public class HttpUtil{
         x.Ext.init(app);
         RequestParams requestParams = new RequestParams(url);
         requestParams.addBodyParameter("sendCode="+fileUploadBean.getSendCode(), new File(fileUploadBean.getOriginalPath()));
+        requestParams.setMultipart(true);
         return x.http().post(requestParams, callback);
     }
 

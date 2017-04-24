@@ -490,7 +490,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             return;
         }
         MessageBean messageBean = new MessageBean();
-        sendMsg(text, MessageBean.TYPE_TEXT,messageBean.getSendCode());
+
         et_message.setText("");  // 清空输入框
 
 
@@ -500,6 +500,9 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         messageBean.setContent(text);
         messageBean.setUserBean(SelfConstant.getUserBean());
         messageBean.setSend_id(SelfConstant.getUserBean().getUser_id());
+
+
+        sendMsg(messageBean);
         mChatMessageAdapter.add(messageBean);
         mLastPosition = mChatMessageAdapter.getItemCount();
         // 平滑的滚动  在键盘打开的情况下必须用smoothScrollToPosition模拟滚动 使用scrollToPosition无效
@@ -708,7 +711,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                 try {
                     for (FileUploadBean fileUploadBean : resultType.getMsg()){
                         URL url = new URL(fileUploadBean.getFilePath());
-                        sendMsg(url.getPath(), MessageBean.TYPE_IMAGE,fileUploadBean.getSendCode());
+                        sendMultiMsg(url.getPath(), MessageBean.TYPE_IMAGE,fileUploadBean.getSendCode());
                     }
 
                 } catch (MalformedURLException e) {
@@ -726,14 +729,15 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     }
     // 上传单个语音文件
     private void uploadAudio(FileUploadBean fileUploadBean) {
-        buildAudio(fileUploadBean);
+        final MessageBean messageBean = buildAudio(fileUploadBean);
         HttpUtil.syncSingleFileUpdate(getApplication(), UrlConstant.AUDIO_UPLOAD, fileUploadBean, new HttpCallback<FileUploadData>() {
             @Override
             public void onSuccess(FileUploadData resultType) {
                 try {
                     for (FileUploadBean fileUploadBean : resultType.getMsg()){
                         URL url = new URL(fileUploadBean.getFilePath());
-                        sendMsg(url.getPath(), MessageBean.TYPE_TEXT,fileUploadBean.getSendCode());
+                        messageBean.setContent(url.getPath());
+                        sendMsg(messageBean);
                     }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -748,7 +752,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             }
         });
     }
-    private void buildAudio(FileUploadBean fileUploadBean) {
+    private MessageBean buildAudio(FileUploadBean fileUploadBean) {
 
         MessageBean messageBean = new MessageBean();
         messageBean.setLocation(MessageBean.LOCATION_RIGHT);
@@ -757,17 +761,17 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         messageBean.setUserBean(SelfConstant.getUserBean());
         messageBean.setSend_id(SelfConstant.getUserBean().getUser_id());
         messageBean.setSendCode(fileUploadBean.getSendCode());
+        messageBean.setDuration(mAudioRecord.getDuration());
+        //messageBean.setDuration();
         mChatMessageAdapter.add(messageBean);
         mLastPosition = mChatMessageAdapter.getItemCount();
         rv_message_list.smoothScrollToPosition(mLastPosition);
-
-
-
+        return messageBean;
     }
 
 
-    private void buildImage(List<FileUploadBean> list) {
-        ArrayList<MessageBean> messageList = new ArrayList<>();
+    private List<MessageBean> buildImage(List<FileUploadBean> list) {
+        List<MessageBean> messageList = new ArrayList<>();
         for (FileUploadBean fileUploadBean : list) {
             MessageBean messageBean = new MessageBean();
             messageBean.setLocation(MessageBean.LOCATION_RIGHT);
@@ -783,10 +787,27 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         // 添加到mChatMessageAdapter中
         // 平滑的滚动  在键盘打开的情况下必须用smoothScrollToPosition模拟滚动 使用scrollToPosition无效
         rv_message_list.smoothScrollToPosition(mLastPosition);
+        return messageList;
     }
 
-    private void sendMsg(String content, String type,String sendCode) {
-        Log.i(TAG, "sendMsg: " + content);
+    private void sendMsg(MessageBean messageBean) {
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put("receive_id", mUserBean.getUser_id());
+            jsonObject.put("type", messageBean.getType());
+            jsonObject.put("content", messageBean.getContent());
+            jsonObject.put("sendCode",messageBean.getSendCode());
+            jsonObject.put("duration",messageBean.getDuration());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        mWs.postMsg(jsonObject);
+
+
+    }
+    private void sendMultiMsg(String content,String type,String sendCode){
         JSONObject jsonObject = new JSONObject();
 
         try {
@@ -799,8 +820,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             e.printStackTrace();
         }
         mWs.postMsg(jsonObject);
-
-
     }
 
     private void startRecord(View view) {

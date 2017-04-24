@@ -22,9 +22,21 @@ public class MessageBean {
     private int location;
     private UserBean userBean;
     private String sendCode;
+    private int duration;  // 音频或视频的时长
+
+
+
     public MessageBean(){
         UUID uuid = UUID.randomUUID();
         this.sendCode = uuid.toString();
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 
     public int getLocation() {

@@ -223,6 +223,14 @@ public class AudioRecordUtil {
         }
     }
 
+    /**
+     * 获取音频的时长
+     * @return  时长 单位为s
+     */
+    public int getDuration(){
+        return recorderSecondsElapsed;
+    }
+
     public void setOnPlayPressListener(OnPlayEventListener listener) {
         this.playEventListener = listener;
     }
