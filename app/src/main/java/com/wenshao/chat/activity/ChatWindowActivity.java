@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -58,6 +59,7 @@ import com.wenshao.chat.util.FileManageUtil;
 import com.wenshao.chat.util.HttpCallback;
 import com.wenshao.chat.util.HttpUtil;
 import com.wenshao.chat.util.PermissionUtil;
+import com.wenshao.chat.util.PlayUtil;
 import com.wenshao.chat.util.ToastUtil;
 import com.wenshao.chat.view.CirclePlayProgress;
 import com.wenshao.chat.view.CustomEditText;
@@ -66,6 +68,7 @@ import com.wenshao.chat.view.CustomRelativeLayout;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -83,14 +86,17 @@ import cn.finalteam.rxgalleryfinal.rxbus.event.ImageMultipleResultEvent;
 import cn.finalteam.rxgalleryfinal.ui.RxGalleryListener;
 import cn.finalteam.rxgalleryfinal.ui.base.IMultiImageCheckedListener;
 
+import static android.os.Build.VERSION_CODES.M;
 import static com.wenshao.chat.R.id.ib_start_intercom;
+import static com.wenshao.chat.R.id.play;
 
 /**
  * Created by wenshao on 2017/4/5.
  * 聊天页面
  */
 
-public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEditorActionListener, View.OnClickListener, CustomEditText.OnBackspacePressListener {
+public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEditorActionListener, View.OnClickListener,
+        CustomEditText.OnBackspacePressListener, ChatMessageAdapter.OnMessageItemClickListener {
     private static final String TAG = "ChatWindowActivity";
     private Context mContext;
     private FaceHelper mFaceHelper;
@@ -108,7 +114,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     private CirclePlayProgress cpp_record_play;
 
     private List<View> faceViews = new ArrayList<View>();
-    private LinearLayout mDotsLayout;
     private ViewPager mViewPager;
 
     private int mLastPosition = 0;
@@ -120,7 +125,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     private static final int LOCAL_INIT_LOAD_ERROR = 11;
     private boolean isKeyboardShow = true;
     private AudioRecordUtil mAudioRecord;
-
 
 
     private Set<View> mutexView;  // 互斥的view
@@ -169,10 +173,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         initDialog();
 
 
-
     }
-
-
 
 
     private void initUi() {
@@ -213,13 +214,15 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         rv_message_list = (RecyclerView) findViewById(R.id.rv_message_list);
 
         //  在onCreate需要指定RecyclerView的Adapter  否则会报No adapter attached; skipping layout
-        mChatMessageAdapter = new ChatMessageAdapter();
+        mChatMessageAdapter = new ChatMessageAdapter(mContext);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         //linearLayoutManager.setReverseLayout(true);  // 顺序反转
         //linearLayoutManager.setStackFromEnd(true);
         rv_message_list.setLayoutManager(linearLayoutManager);
         rv_message_list.setAdapter(mChatMessageAdapter);
         rv_message_list.setHasFixedSize(true);
+
+        mChatMessageAdapter.setOnItemClickListener(this);
 
 
         //监听RecyclerView滚动状态
@@ -259,7 +262,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                 hiddenOutSelf(v);   // 隐藏快捷栏所有的显示
             }
         });
-
 
 
     }
@@ -322,7 +324,9 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         mNewMessageReceiver.setOnWsEventListener(new ChatWsEventListener());
 
     }
-    private class ChatWsEventListener extends WsEventListener{
+
+
+    private class ChatWsEventListener extends WsEventListener {
 
         @Override
         public void reconnect() {
@@ -382,7 +386,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
      */
     private void initDialog() {
         final String audioPath = FileManageUtil.getAudioPath() + "audio.amr";
-        View view = View.inflate(this, R.layout.record_dialog,null);
+        View view = View.inflate(this, R.layout.record_dialog, null);
         mRecordDialog = new Dialog(this, R.style.DialogStyle);
         mRecordDialog.setContentView(view);
 
@@ -394,7 +398,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
         WindowManager.LayoutParams lp = window.getAttributes();
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;   //设置宽度充满屏幕
-        lp.height = DisplayUtil.dip2px(mContext,250);
+        lp.height = DisplayUtil.dip2px(mContext, 250);
 
         window.setAttributes(lp);
 
@@ -417,11 +421,11 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             public void onClick(View v) {
                 FileUploadBean fileUploadBean = new FileUploadBean();
                 fileUploadBean.setOriginalPath(audioPath);
+                mAudioRecord.reset();
                 uploadAudio(fileUploadBean);
                 mRecordDialog.dismiss();
-                mAudioRecord.reset();
-                cpp_record_play.setImageResource(R.drawable.ic_action_playback_pause_big);
 
+                cpp_record_play.setImageResource(R.drawable.ic_action_playback_pause_big);
 
 
             }
@@ -433,7 +437,9 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
             }
         });
-        mAudioRecord = new AudioRecordUtil(audioPath, tv_timer,cpp_record_play);
+        mAudioRecord = new AudioRecordUtil(audioPath, tv_timer, cpp_record_play);
+
+
 
         mAudioRecord.setOnPlayPressListener(new AudioRecordUtil.OnPlayEventListener() {
             @Override
@@ -682,7 +688,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                         //Toast.makeText(getBaseContext(), "已选择" + imageMultipleResultEvent.getResult().size() + "张图片", Toast.LENGTH_SHORT).show();
                         List<MediaBean> result = imageMultipleResultEvent.getResult();
                         List<FileUploadBean> fileList = new ArrayList<>();
-                        for (MediaBean mediaBean : result){
+                        for (MediaBean mediaBean : result) {
                             FileUploadBean fileUploadBean = new FileUploadBean();
                             fileUploadBean.setOriginalPath(mediaBean.getOriginalPath());
                             fileList.add(fileUploadBean);
@@ -709,9 +715,9 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             @Override
             public void onSuccess(FileUploadData resultType) {
                 try {
-                    for (FileUploadBean fileUploadBean : resultType.getMsg()){
+                    for (FileUploadBean fileUploadBean : resultType.getMsg()) {
                         URL url = new URL(fileUploadBean.getFilePath());
-                        sendMultiMsg(url.getPath(), MessageBean.TYPE_IMAGE,fileUploadBean.getSendCode());
+                        sendMultiMsg(url.getPath(), MessageBean.TYPE_IMAGE, fileUploadBean.getSendCode());
                     }
 
                 } catch (MalformedURLException e) {
@@ -727,6 +733,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             }
         });
     }
+
     // 上传单个语音文件
     private void uploadAudio(FileUploadBean fileUploadBean) {
         final MessageBean messageBean = buildAudio(fileUploadBean);
@@ -734,7 +741,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             @Override
             public void onSuccess(FileUploadData resultType) {
                 try {
-                    for (FileUploadBean fileUploadBean : resultType.getMsg()){
+                    for (FileUploadBean fileUploadBean : resultType.getMsg()) {
                         URL url = new URL(fileUploadBean.getFilePath());
                         messageBean.setContent(url.getPath());
                         sendMsg(messageBean);
@@ -752,11 +759,12 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             }
         });
     }
+
     private MessageBean buildAudio(FileUploadBean fileUploadBean) {
 
         MessageBean messageBean = new MessageBean();
         messageBean.setLocation(MessageBean.LOCATION_RIGHT);
-        messageBean.setType(MessageBean.TYPE_TEXT);
+        messageBean.setType(MessageBean.TYPE_AUDIO);
         messageBean.setContent(fileUploadBean.getOriginalPath());
         messageBean.setUserBean(SelfConstant.getUserBean());
         messageBean.setSend_id(SelfConstant.getUserBean().getUser_id());
@@ -797,8 +805,8 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             jsonObject.put("receive_id", mUserBean.getUser_id());
             jsonObject.put("type", messageBean.getType());
             jsonObject.put("content", messageBean.getContent());
-            jsonObject.put("sendCode",messageBean.getSendCode());
-            jsonObject.put("duration",messageBean.getDuration());
+            jsonObject.put("sendCode", messageBean.getSendCode());
+            jsonObject.put("duration", messageBean.getDuration());
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -807,14 +815,15 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
 
     }
-    private void sendMultiMsg(String content,String type,String sendCode){
+
+    private void sendMultiMsg(String content, String type, String sendCode) {
         JSONObject jsonObject = new JSONObject();
 
         try {
             jsonObject.put("receive_id", mUserBean.getUser_id());
             jsonObject.put("type", type);
             jsonObject.put("content", content);
-            jsonObject.put("sendCode",sendCode);
+            jsonObject.put("sendCode", sendCode);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -832,11 +841,11 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             mAudioRecord.endRecord();
             cpp_record_play.setImageResource(R.drawable.ic_action_playback_play_big);
 
-        } else if (mAudioRecord.getStatus() == AudioRecordUtil.STATUS_PLAY_FREE){
+        } else if (mAudioRecord.getStatus() == AudioRecordUtil.STATUS_PLAY_FREE) {
             mAudioRecord.startPlay();
             cpp_record_play.setImageResource(R.drawable.ic_action_playback_pause_big);
 
-        } else if (mAudioRecord.getStatus() == AudioRecordUtil.STATUS_PLAYING){
+        } else if (mAudioRecord.getStatus() == AudioRecordUtil.STATUS_PLAYING) {
             mAudioRecord.endPlay();
             cpp_record_play.setImageResource(R.drawable.ic_action_playback_play_big);
 
@@ -850,5 +859,23 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         Log.i(TAG, "onBackspacePressed: " + et_message.getText().toString());
     }
 
+    @Override
+    public void onMessageItemClick(View view, int position) {
+        MessageBean messageBean = messageBeanList.get(position);
+        if (MessageBean.TYPE_AUDIO.equals(messageBean.getType())) {  // 点击了语音类型的消息
+            PlayUtil  play = PlayUtil.getInstance();
+            boolean b = play.setUrl(messageBean.getContent(), messageBean.getDuration());
+            if (b){
+                play.startAudio();
+            }else{
+                ToastUtil.show(mContext,"播放错误");
+            }
+
+        } else if (MessageBean.TYPE_TEXT.equals(messageBean.getType())){
+
+        } else if (MessageBean.TYPE_IMAGE.equals(messageBean.getType())){
+
+        }
+    }
 
 }

@@ -27,7 +27,8 @@
         android:textColor="@android:color/black"
         android:background="@drawable/aio_bg_eye_right"
         android:layout_toLeftOf="@+id/rw_head"
-        android:layout_toStartOf="@+id/rw_head"/>
+        android:layout_toStartOf="@+id/rw_head"
+        android:gravity="center"/>
     <com.makeramen.roundedimageview.RoundedImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

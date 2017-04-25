@@ -27,6 +27,7 @@ public class AudioRecordUtil {
     private TextView showTimer;
     private OnPlayEventListener playEventListener;
     private CirclePlayProgress progress;
+    private int mDuration=0;
 
     public final static int STATUS_RECORD_FREE = 0;   // 录音空闲状态
     public final static int STATUS_RECORDING = 1;  // 录音中
@@ -52,6 +53,9 @@ public class AudioRecordUtil {
         this.progress = progress;
     }
 
+    public AudioRecordUtil(String filePath){
+        this.filePath = filePath;
+    }
 
     public void reset() {
         if (status == STATUS_RECORDING) {
@@ -70,6 +74,7 @@ public class AudioRecordUtil {
     public void startRecord() {
 
         reset();
+        mDuration=0;
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
@@ -167,6 +172,7 @@ public class AudioRecordUtil {
     private void updateTimer() {
         if (status == STATUS_RECORDING) {
             recorderSecondsElapsed++;
+            mDuration++;
             showTimer.setText(formatSeconds(recorderSecondsElapsed));
         } else if (status == STATUS_PLAYING) {
             playerSecondsElapsed++;
@@ -228,7 +234,7 @@ public class AudioRecordUtil {
      * @return  时长 单位为s
      */
     public int getDuration(){
-        return recorderSecondsElapsed;
+        return mDuration;
     }
 
     public void setOnPlayPressListener(OnPlayEventListener listener) {
