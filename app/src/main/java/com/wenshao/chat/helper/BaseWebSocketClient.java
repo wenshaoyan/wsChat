@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +37,8 @@ public class BaseWebSocketClient extends WebSocketClient {
     }
 
     public BaseWebSocketClient(URI uri, Application application) {
-        super(uri,new Draft_17());
-        mApplication=application;
+        super(uri, new Draft_17());
+        mApplication = application;
     }
 
     public BaseWebSocketClient(URI uri, Map<String, String> map, Application mApplication) {
@@ -49,18 +50,27 @@ public class BaseWebSocketClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
         Intent intent = new Intent();
+
         intent.setAction("com.wenshao.chat.onReconnect");
         mApplication.sendBroadcast(intent);
-        Log.i(TAG, "onOpen: "+this.toString());
+
+
     }
 
     @Override
     public void onMessage(String s) {
         // 发送广播
         Intent intent = new Intent();
-        intent.putExtra("message",s);
-        intent.setAction("com.wenshao.chat.onMessage");
-        mApplication.sendBroadcast(intent);
+        try {
+            JSONObject jsonObject = new JSONObject(s);
+            String eventName = jsonObject.getString("eventName");
+            String message = jsonObject.getString("message");
+            intent.putExtra("message", message);
+            intent.setAction("com.wenshao.chat."+eventName);
+            mApplication.sendBroadcast(intent);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
     }
@@ -81,9 +91,9 @@ public class BaseWebSocketClient extends WebSocketClient {
 
     public void postMsg(JSONObject jsonObject) {
         try {
-            jsonObject.put("eventName","postMsg");
+            jsonObject.put("eventName", "postMsg");
             this.send(jsonObject.toString());
-        }catch (WebsocketNotConnectedException e){
+        } catch (WebsocketNotConnectedException e) {
             //TODO 加入待代发队列
         } catch (JSONException e) {
             e.printStackTrace();

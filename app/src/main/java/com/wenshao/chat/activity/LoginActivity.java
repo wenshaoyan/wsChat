@@ -21,6 +21,7 @@ import com.wenshao.chat.constant.SelfConstant;
 import com.wenshao.chat.constant.SpConstant;
 import com.wenshao.chat.constant.UrlConstant;
 import com.wenshao.chat.exception.LoginInfoException;
+import com.wenshao.chat.service.WebSocketService;
 import com.wenshao.chat.util.HttpCallback;
 import com.wenshao.chat.util.HttpUtil;
 import com.wenshao.chat.util.PhoneInfo;
@@ -54,6 +55,9 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what==LOGIN_SUC){
+                Intent intent1 = new Intent(mContext, WebSocketService.class);
+                //intent1.putExtra("")
+                startService(intent1);
                 Intent intent = new Intent(mContext, IndexActivity.class);
                 //用Bundle携带数据
                 Bundle bundle=new Bundle();

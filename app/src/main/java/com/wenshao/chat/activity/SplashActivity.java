@@ -101,7 +101,6 @@ public class SplashActivity extends Activity {
 
         initUi();
         initData();
-        intiUniversal();
         //initImageLoader();
     }
 
@@ -152,15 +151,7 @@ public class SplashActivity extends Activity {
     }
 
 
-    private void intiUniversal() {
-        //创建默认的ImageLoader配置参数
-        ImageLoaderConfiguration configuration = new ImageLoaderConfiguration.Builder(this)
-                .writeDebugLogs() //打印log信息
-                .build();
 
-        //Initialize ImageLoader with configuration.
-        ImageLoader.getInstance().init(configuration);
-    }
     //ImageLoaderConfiguration
     private void initImageLoader() {
         ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(this);

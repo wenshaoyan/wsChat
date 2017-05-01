@@ -18,6 +18,9 @@
     <color name="finalButtonPressed">#10a0d7</color>
     <color name="finalButtonNormal">#23baf4</color>
     <color name="lighter_gray">#dddddd</color>
+    <color name="deepGray">#817f7f</color>
+
+
 
 
 </resources>

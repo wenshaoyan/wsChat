@@ -7,7 +7,7 @@ import java.util.UUID;
  * 消息对象
  */
 
-public class MessageBean {
+public class MessageBean implements Cloneable {
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_IMAGE = "image";
     public static final String TYPE_AUDIO = "audio";
@@ -29,6 +29,16 @@ public class MessageBean {
     public MessageBean(){
         UUID uuid = UUID.randomUUID();
         this.sendCode = uuid.toString();
+    }
+    public MessageBean clone(){
+        MessageBean o = null;
+        try {
+            // Object中的clone()识别出你要复制的是哪一个对象。
+            o = (MessageBean) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println(e.toString());
+        }
+        return o;
     }
 
     public int getDuration() {
