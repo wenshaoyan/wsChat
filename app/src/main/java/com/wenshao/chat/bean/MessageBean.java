@@ -23,6 +23,7 @@ public class MessageBean implements Cloneable {
     private UserBean userBean;
     private String sendCode;
     private int duration;  // 音频或视频的时长
+    private String receive_id;
 
 
 
@@ -104,5 +105,13 @@ public class MessageBean implements Cloneable {
 
     public void setSendCode(String sendCode) {
         this.sendCode = sendCode;
+    }
+
+    public String getReceive_id() {
+        return receive_id;
+    }
+
+    public void setReceive_id(String receive_id) {
+        this.receive_id = receive_id;
     }
 }

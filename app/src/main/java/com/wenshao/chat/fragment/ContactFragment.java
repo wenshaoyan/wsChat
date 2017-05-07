@@ -21,7 +21,9 @@ import com.wenshao.chat.adapter.ContactAdapter;
 import com.wenshao.chat.bean.FriendBean;
 import com.wenshao.chat.bean.UserBean;
 import com.wenshao.chat.bean.UserFriendsData;
+import com.wenshao.chat.constant.HandlerCode;
 import com.wenshao.chat.constant.UrlConstant;
+import com.wenshao.chat.helper.GlobalApplication;
 import com.wenshao.chat.util.HttpCallback;
 import com.wenshao.chat.util.HttpUtil;
 
@@ -43,11 +45,7 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private SwipeRefreshLayout spl_refresh;
     private List<FriendBean> mFriends;
 
-    private int NETWORK_LOADING_SUC = 10;  //网络加载成功
-    private int NETWORK_LOADING_ERROR = 11;  //网络加载失败
-    private int LOCALHOST_LOADING_SUC = 20;  //本地加载成功
-    private int LOCALHOST_LOADING_ERROR = 21;  //本地失败
-    private int not_LOADING = 1;  //不需要加载
+
 
 
     private int DOWN_REFRESH_SUC=30;  // 网络刷新成功
@@ -59,9 +57,7 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what==NETWORK_LOADING_SUC){
-                UserFriendsData UserFriends = (UserFriendsData) msg.obj;
-                mFriends = UserFriends.getFriends();
+            if (msg.what==HandlerCode.LOCAL_QUERY_SUC){
                 ContactAdapter contactAdapter = new ContactAdapter(mContext, mFriends);
                 elv_user_list.setAdapter(contactAdapter);
             }else if (msg.what==DOWN_REFRESH_SUC){
@@ -110,12 +106,15 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (status == 0) {   // 第一次初始化
             mContext = getActivity();
             mApplication = getActivity().getApplication();
+
             initUi();
-            initNetworkData();
+            localData();
             status = 1;
+
         }
 
     }
+
 
     private void initUi() {
         elv_user_list = (ExpandableListView) rootView.findViewById(R.id.elv_user_list);
@@ -148,14 +147,23 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
 //        });
     }
 
+    /**
+     * 获取本地数据
+     */
+    private void localData(){
+        mFriends = GlobalApplication.getDaoInstant().getFriendBeanDao().queryBuilder().list();
+
+        mHandler.sendEmptyMessage(HandlerCode.LOCAL_QUERY_SUC);
+
+    }
     // 加载网络数据
-    private void initNetworkData() {
+    private void networkData() {
         HttpUtil.syncPost(mApplication, UrlConstant.getInstance().userInfo(), null, new HttpCallback<UserFriendsData>() {
             @Override
             public void onSuccess(UserFriendsData resultType) {
                 super.onSuccess(resultType);
                 Message message = new Message();
-                message.what=NETWORK_LOADING_SUC;
+                message.what= HandlerCode.HTTP_REQUEST_SUC;
                 message.obj=resultType;
                 mHandler.sendMessage(message);
 

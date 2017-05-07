@@ -80,7 +80,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     public void addAll(List<MessageBean> list) {
         if (dataList != null && list != null) {
             dataList.addAll(list);
-            notifyItemRangeChanged(dataList.size(), list.size());
+            //notifyItemRangeChanged(dataList.size(), list.size());
         }
         notifyDataSetChanged();
     }
@@ -88,7 +88,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     public void add(MessageBean messageBean) {
         if (messageBean != null) {
             dataList.add(messageBean);
-            notifyItemRangeChanged(dataList.size(), 1);
+            //notifyItemRangeChanged(dataList.size(), 1);
         }
         notifyDataSetChanged();
     }

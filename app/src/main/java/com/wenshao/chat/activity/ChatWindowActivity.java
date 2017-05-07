@@ -44,6 +44,7 @@ import com.wenshao.chat.adapter.FaceVPAdapter;
 import com.wenshao.chat.adapter.SmallFaceAdapter;
 import com.wenshao.chat.bean.FileUploadBean;
 import com.wenshao.chat.bean.FileUploadData;
+import com.wenshao.chat.bean.RecentContactBean;
 import com.wenshao.chat.bean.MessageBean;
 import com.wenshao.chat.bean.MessageData;
 import com.wenshao.chat.bean.UserBean;
@@ -73,6 +74,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -117,13 +119,13 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
     private int mLastPosition = 0;
 
-    private static final int NETWORK_INIT_LOAD_SUC = 0;
-    private static final int NETWORK_INIT_LOAD_ERROR = 1;
+    private static final int NETWORK_INIT_LOAD_SUC = 0x01;
+    private static final int NETWORK_INIT_LOAD_ERROR = 0x02;
 
-    private static final int LOCAL_INIT_LOAD_SUC = 10;
-    private static final int LOCAL_INIT_LOAD_ERROR = 11;
+    private static final int LOCAL_INIT_LOAD_SUC = 0x11;
+    private static final int LOCAL_INIT_LOAD_ERROR = 0x12;
 
-    private static final int SOCKET_NEW_MSG = 20;
+    private static final int SOCKET_NEW_MSG = 0x21;
 
 
     private boolean isKeyboardShow = true;
@@ -142,7 +144,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                     mLastPosition = mChatMessageAdapter.getItemCount() - 1;
                     LinearLayoutManager layoutManager = (LinearLayoutManager) rv_message_list.getLayoutManager();
                     if (mLastPosition > 7) {   // 判断当前长度是否大于7 防止列表过长时  smoothScrollToPosition时间过长
-                        Log.i(TAG, "handleMessage: ===============");
                         layoutManager.setStackFromEnd(true);   //最后一个位于底部
                     } else {
                         layoutManager.setStackFromEnd(false);  // 第一个位于顶部
@@ -327,6 +328,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.wenshao.chat.newMsg");
         intentFilter.addAction("com.wenshao.chat.onReconnect");
+        intentFilter.addAction("com.wenshao.chat.responseMsg");
         registerReceiver(mNewMessageReceiver, intentFilter);
         mNewMessageReceiver.setOnWsEventListener(new ChatWsEventListener());
 
@@ -348,14 +350,18 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         @Override
         public void newMsg(MessageBean messageBean) {
             super.newMsg(messageBean);
-            messageBean.setUserBean(mReceiveUserBean);
-            messageBean.setLocation(MessageBean.LOCATION_LEFT);
-            mChatMessageAdapter.add(messageBean);
-            mLastPosition = mChatMessageAdapter.getItemCount();
-            rv_message_list.smoothScrollToPosition(mLastPosition);
+            if (mReceiveUserBean.getUser_id().equals(messageBean.getSend_id())){
+                messageBean.setUserBean(mReceiveUserBean);
+                messageBean.setLocation(MessageBean.LOCATION_LEFT);
+                mChatMessageAdapter.add(messageBean);
+                mLastPosition = mChatMessageAdapter.getItemCount();
+                rv_message_list.smoothScrollToPosition(mLastPosition);
+            }
+
         }
         @Override
         public void responseMsg(String str) {
+            Log.i(TAG, "responseMsg: "+str);
             super.responseMsg(str);
         }
     }
@@ -363,6 +369,8 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     private void initData() {
         Map<String, String> map = new HashMap<>();
         map.put("receive_id", mReceiveUserBean.getUser_id());
+        // TODO 检查本地缓存是否存在记录
+
         HttpUtil.syncPost(getApplication(), UrlConstant.getInstance().messageFriend(), map, new HttpCallback<MessageData>() {
             @Override
             public void onSuccess(MessageData resultType) {
@@ -526,6 +534,8 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         messageBean.setContent(text);
         messageBean.setUserBean(SelfConstant.getUserBean());
         messageBean.setSend_id(SelfConstant.getUserBean().getUser_id());
+        messageBean.setReceive_id(mReceiveUserBean.getUser_id());
+        messageBean.setCreate_time(new Date().getTime());
 
 
         sendMsg(messageBean);
@@ -649,7 +659,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ib_voice:
-
                 if (record_container.getVisibility() == View.GONE) {
                     Log.i(TAG, "onClick: open");
                     record_container.setVisibility(View.VISIBLE);
@@ -783,6 +792,8 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         messageBean.setSend_id(SelfConstant.getUserBean().getUser_id());
         messageBean.setSendCode(fileUploadBean.getSendCode());
         messageBean.setDuration(mAudioRecord.getDuration());
+        messageBean.setReceive_id(mReceiveUserBean.getUser_id());
+        messageBean.setCreate_time(new Date().getTime());
         //messageBean.setDuration();
         mChatMessageAdapter.add(messageBean);
         mLastPosition = mChatMessageAdapter.getItemCount();
@@ -816,6 +827,15 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         String Url = messageBean.getContent();
         String content;
         String type = messageBean.getType();
+        if (messageBean.getCreate_time()==0){
+            messageBean.setCreate_time(new Date().getTime());
+
+        }
+
+        RecentContactBean recentContactBean = new RecentContactBean(messageBean);
+        recentContactBean.setUserBean(mReceiveUserBean);
+        GlobalApplication.addRecentContact(recentContactBean);
+
 
         try {
             if ((MessageBean.TYPE_AUDIO.equals(type) || MessageBean.TYPE_IMAGE.equals(type) )&&"http".equals(Url.substring(0,4))){
@@ -823,7 +843,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             }else{
                 content=Url;
             }
-            jsonObject.put("receive_id", mReceiveUserBean.getUser_id());
+            jsonObject.put("receive_id", messageBean.getReceive_id());
             jsonObject.put("type", messageBean.getType());
             jsonObject.put("content", content);
             jsonObject.put("sendCode", messageBean.getSendCode());

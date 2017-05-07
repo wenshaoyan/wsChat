@@ -15,12 +15,15 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.wenshao.chat.R;
-import com.wenshao.chat.bean.LastMessageData;
+import com.wenshao.chat.bean.RecentContactBean;
 import com.wenshao.chat.gooview.GooViewListener;
+import com.wenshao.chat.helper.GlobalApplication;
 import com.wenshao.chat.util.GooViewUtils;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wenshao on 2017/4/1.
@@ -29,16 +32,23 @@ import java.util.List;
 
 public class MessageAdapter extends BaseAdapter {
     private HashSet<Integer> mRemoved = new HashSet<Integer>();
-    private List<LastMessageData> lastMessageDataList;
+    private List<RecentContactBean> recentContactBeanList;
     private Context mContext;
     private ImageLoader mImageLoader;
     private DisplayImageOptions mOptions;
     private SwipeRefreshLayout mSwipeRefresh;
+    private Map<String, RecentContactBean> mUserIdMessage;
 
-    public MessageAdapter(Context context, List<LastMessageData> list, SwipeRefreshLayout refresh){
-        this.mContext=context;
-        this.lastMessageDataList =list;
-        mSwipeRefresh=refresh;
+    public MessageAdapter(Context context, List<RecentContactBean> list, SwipeRefreshLayout refresh) {
+        this.mContext = context;
+        this.recentContactBeanList = list;
+        mSwipeRefresh = refresh;
+        mUserIdMessage = new HashMap<>();
+
+
+        for (RecentContactBean l : list) {
+            mUserIdMessage.put(l.getUserBean().getUser_id(), l);
+        }
 
         //final ImageView mImageView = (ImageView) findViewById(R.id.image);
         //
@@ -56,14 +66,34 @@ public class MessageAdapter extends BaseAdapter {
 
     }
 
-    @Override
-    public int getCount() {
-        return lastMessageDataList.size();
+    public void add(RecentContactBean recentContactBean) {
+        if (recentContactBeanList != null) {
+            String user_id = recentContactBean.getUserBean().getUser_id();
+            if (mUserIdMessage.containsKey(user_id)) {
+                mUserIdMessage.get(user_id).replace(recentContactBean);
+                // 写入本地数据库
+                //GlobalApplication.getDaoInstant().getRecentContactBeanDao().insertOrReplace(recentContactBean);
+            } else {
+                recentContactBeanList.add(recentContactBean);
+                mUserIdMessage.put(user_id, recentContactBean);
+
+            }
+            GlobalApplication.getDaoInstant().getRecentContactBeanDao().insertOrReplace(mUserIdMessage.get(user_id));
+
+            notifyDataSetChanged();
+        }
+
+
     }
 
     @Override
-    public LastMessageData getItem(int position) {
-        return lastMessageDataList.get(position);
+    public int getCount() {
+        return recentContactBeanList.size();
+    }
+
+    @Override
+    public RecentContactBean getItem(int position) {
+        return recentContactBeanList.get(position);
     }
 
     @Override
@@ -77,21 +107,32 @@ public class MessageAdapter extends BaseAdapter {
             convertView = View.inflate(mContext, R.layout.message_item_view, null);
         }
         ViewHolder holder = ViewHolder.getHolder(convertView);
-        holder.tv_content.setText(lastMessageDataList.get(position).getLastContent());
+
+        RecentContactBean recentContactBean = recentContactBeanList.get(position);
+
+        holder.tv_content.setText(recentContactBean.getLastContent());
+        holder.tv_name.setText(recentContactBean.getUserBean().getName());
+        holder.tv_time.setText(recentContactBean.getLastTimeString());
+
         //item固定小红点layout
         LinearLayout pointLayout = holder.ll_point;
         //item固定小红点
         final TextView point = holder.tv_point;
 
         // 加载头像
-        String imageUrl = "http://123.207.55.204:8081/image/20111130111800760.jpg";
-        mImageLoader.displayImage(imageUrl,holder.rw_head,mOptions);
+        String imageUrl = recentContactBean.getUserBean().getHead();
+        mImageLoader.displayImage(imageUrl, holder.rw_head, mOptions);
 
+        boolean visitable;
+        if (recentContactBean.getUnreadNumber() == 0) {
+            visitable = false;
+        } else {
+            visitable = !mRemoved.contains(position);
 
-        boolean visitable = !mRemoved.contains(position);
+        }
         pointLayout.setVisibility(visitable ? View.VISIBLE : View.GONE);
         if (visitable) {
-            point.setText(String.valueOf(position));
+            point.setText(String.valueOf(recentContactBean.getUnreadNumber()));
             pointLayout.setTag(position);
             GooViewListener mGooListener = new GooViewListener(mContext, pointLayout) {
                 @Override
@@ -105,7 +146,7 @@ public class MessageAdapter extends BaseAdapter {
                             mSwipeRefresh.setEnabled(true);
                             break;
                     }
-                    return super.onTouch(v,event);
+                    return super.onTouch(v, event);
                 }
 
                 @Override
@@ -128,6 +169,7 @@ public class MessageAdapter extends BaseAdapter {
         }
         return convertView;
     }
+
     private static class ViewHolder {
 
         private RoundedImageView rw_head;
@@ -142,6 +184,8 @@ public class MessageAdapter extends BaseAdapter {
             tv_point = (TextView) convertView.findViewById(R.id.tv_point);
             ll_point = (LinearLayout) convertView.findViewById(R.id.ll_point);
             tv_content = (TextView) convertView.findViewById(R.id.tv_content);
+            tv_name = (TextView) convertView.findViewById(R.id.tv_name);
+            tv_time = (TextView) convertView.findViewById(R.id.tv_time);
         }
 
         static ViewHolder getHolder(View convertView) {

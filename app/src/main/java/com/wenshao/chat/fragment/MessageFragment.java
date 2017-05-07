@@ -16,8 +16,9 @@ import android.widget.ListView;
 
 import com.wenshao.chat.R;
 import com.wenshao.chat.adapter.MessageAdapter;
-import com.wenshao.chat.bean.LastMessageData;
-import com.wenshao.chat.bean.UserBean;
+import com.wenshao.chat.bean.RecentContactBean;
+import com.wenshao.chat.constant.HandlerCode;
+import com.wenshao.chat.helper.GlobalApplication;
 
 
 import java.util.ArrayList;
@@ -37,26 +38,23 @@ public class MessageFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private int REFRESH = 2;
 
     private ListView lv_message;
-    private List<LastMessageData> lastMessageDataList;
+    private List<RecentContactBean> recentContactBeanList;
     private Context mContext;
     private SwipeRefreshLayout spl_refresh;
 
-    private int FIRST_LOAD_SUC =10;
-    private int FIRST_LOAD_ERROR =11;
 
-    private int DOWN_REFRESH_SUC=20;
-    private int DOWN_REFRESH_ERROR=21;
-
-
+    private int DOWN_REFRESH_SUC = 20;
+    private int DOWN_REFRESH_ERROR = 21;
 
 
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what==FIRST_LOAD_SUC){
-                MessageAdapter messageAdapter = new MessageAdapter(mContext, lastMessageDataList,spl_refresh);
+            if (msg.what == HandlerCode.LOCAL_QUERY_SUC) {
+                MessageAdapter messageAdapter = new MessageAdapter(mContext, recentContactBeanList, spl_refresh);
+                GlobalApplication.setRecentContactsAdapter(messageAdapter);
                 lv_message.setAdapter(messageAdapter);
-            }else if (msg.what==DOWN_REFRESH_SUC){
+            } else if (msg.what == DOWN_REFRESH_SUC) {
                 spl_refresh.setRefreshing(false);
             }
 
@@ -106,8 +104,9 @@ public class MessageFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onStart();
         if (status == INIT_LOAD_FINISH) {
             initUi();
-            initData();
+            localData();
         }
+
 
     }
 
@@ -120,28 +119,27 @@ public class MessageFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     }
 
-    private void initData() {
-        lastMessageDataList = new ArrayList<>();
-        for (int index = 0; index < 23; index++) {
-            LastMessageData lastMessageData = new LastMessageData();
-            UserBean userBean = new UserBean();
-            userBean.setHead("aaa");
-            userBean.setName("wenshao" + index);
-            lastMessageData.setUserBean(userBean);
-            lastMessageData.setLastContent("aaaaaa" + index);
-            lastMessageData.setLastTime(11111);
-            lastMessageData.setUnreadNumber(10);
 
-            lastMessageDataList.add(lastMessageData);
-        }
-        mHandler.sendEmptyMessage(FIRST_LOAD_SUC);
+    /**
+     * 获取本地数据
+     */
+    private void localData(){
+        recentContactBeanList = GlobalApplication.getDaoInstant().getRecentContactBeanDao().queryBuilder().list();
 
+        mHandler.sendEmptyMessage(HandlerCode.LOCAL_QUERY_SUC);
 
     }
 
+    /**
+     * 获取网络数据数据
+     */
+    private void networkData() {
+    }
+
+
     @Override
     public void onRefresh() {
-        new Thread(){
+        new Thread() {
             @Override
             public void run() {
                 SystemClock.sleep(2000);

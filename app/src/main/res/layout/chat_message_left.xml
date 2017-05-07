@@ -29,7 +29,7 @@
         android:layout_toEndOf="@id/rw_head"
         android:textColor="@android:color/black"
         android:background="@drawable/aio_bg_eye_left"
-        android:gravity="center" />
+        android:gravity="left" />
     <com.wenshao.chat.view.VoicePlayingView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

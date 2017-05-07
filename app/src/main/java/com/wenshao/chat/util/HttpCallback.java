@@ -17,6 +17,7 @@ import org.xutils.ex.HttpException;
 
 public class HttpCallback<T> implements Callback.CommonCallback<T> {
     private String TAG ="HttpCallback";
+
     @Override
     public void onSuccess(T resultType) {
 

@@ -30,7 +30,7 @@
         android:background="@drawable/aio_user_bg_nor_12"
         android:layout_toLeftOf="@+id/rw_head"
         android:layout_toStartOf="@+id/rw_head"
-        android:gravity="center"
+        android:gravity="left"
         android:visibility="gone"/>
     <com.wenshao.chat.view.VoicePlayingView
         android:layout_width="wrap_content"

@@ -31,16 +31,14 @@
             android:id="@+id/tv_name"
             android:textColor="@android:color/black"
             android:textSize="19sp"
-            android:ellipsize="end"
-            android:text="uuuuuu"/>
+            android:ellipsize="end"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:lines="1"
             android:textSize="16sp"
             android:id="@+id/tv_content"
-            android:ellipsize="end"
-            android:text="2222"/>
+            android:ellipsize="end"/>
 
     </LinearLayout>
 
@@ -57,7 +55,6 @@
             android:id="@+id/tv_time"
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray"
-            android:text="11111"
             android:layout_marginTop="10dp"/>
 
         <LinearLayout

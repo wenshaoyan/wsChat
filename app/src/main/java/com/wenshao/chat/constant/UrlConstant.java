@@ -24,10 +24,14 @@ public class UrlConstant {
 
     // 登录接口
     private final static String mLogin = "/users/login";
-    // 初始化接口
+    // 初始化
+    private final static String mInit = "/users/init";
+
+    // 获取好友列表
     private final static String mUserInfo = "/users/userInfo";
     // 获取聊天室的消息列表
     private final static String mMessageFriend = "/users/message/friend";
+
 
     private static final UrlConstant urlConstant = new UrlConstant();
     private static String serviceUrl;
@@ -68,6 +72,10 @@ public class UrlConstant {
     }
     public String messageFriend(){
         return getServiceUrl()+mMessageFriend;
+    }
+
+    public String init(){
+        return getServiceUrl()+mInit;
     }
 
 

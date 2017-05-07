@@ -33,9 +33,14 @@ public class NewMessageReceiver extends BroadcastReceiver {
             if ("com.wenshao.chat.responseMsg".equals(action)) {
                 wsEventListener.responseMsg(message);
             } else if ("com.wenshao.chat.newMsg".equals(action)) {
-                Log.i(TAG, "onReceive: "+message);
-                MessageBean messageBean = new Gson().fromJson(message, MessageBean.class);
-                wsEventListener.newMsg(messageBean);
+                try {
+                    MessageBean messageBean = new Gson().fromJson(message, MessageBean.class);
+                    wsEventListener.newMsg(messageBean);
+
+                }catch (Exception e){
+
+
+                }
             }
 
         }

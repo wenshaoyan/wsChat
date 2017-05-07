@@ -42,10 +42,27 @@ public class HttpUtil{
             requestParams.addHeader("token",token);
         }
         HttpManager http = x.http();
-
-
         return http.post(requestParams, callback);
     }
+
+    public static <T> Callback.Cancelable syncLogin(Application app, String url, Map<String,String> map, LoginHttpCallback<T> callback){
+
+        x.Ext.init(app);
+        RequestParams requestParams = new RequestParams(url);
+        if (map!=null){
+            for(Map.Entry<String, String> entry : map.entrySet()){
+                requestParams.addBodyParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        String token = getToken(url,app);
+        Log.i("TokenId", "syncPost: "+token+",url:"+url);
+        if (token!=null){
+            requestParams.addHeader("token",token);
+        }
+
+        return x.http().post(requestParams, callback);
+    }
+
     public static <T> Callback.Cancelable syncPost(Application app, String url, Map<String,String> map, Callback.CommonCallback<T> callback){
 
         x.Ext.init(app);

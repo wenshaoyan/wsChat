@@ -16,14 +16,17 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.wenshao.chat.R;
+import com.wenshao.chat.bean.InitData;
 import com.wenshao.chat.bean.LoginDate;
 import com.wenshao.chat.bean.ServiceAddressData;
 import com.wenshao.chat.bean.UserBean;
 import com.wenshao.chat.constant.EnvConstant;
+import com.wenshao.chat.constant.HandlerCode;
 import com.wenshao.chat.constant.SelfConstant;
 import com.wenshao.chat.constant.SpConstant;
 import com.wenshao.chat.constant.UrlConstant;
 import com.wenshao.chat.helper.BaseWebSocketHelper;
+import com.wenshao.chat.helper.GlobalApplication;
 import com.wenshao.chat.service.WebSocketService;
 import com.wenshao.chat.util.HttpCallback;
 import com.wenshao.chat.util.HttpUtil;
@@ -52,15 +55,12 @@ public class SplashActivity extends Activity {
     private final String TAG = "SplashActivity";
 
     private UserBean mUserBean;
+    private InitData mInitData;
+
 
 
     private final int INIT_SERVICE_FINISHED = 0; //初始化完成
     private final int JUMP_LOGIN = 1;           //跳转至登录页面
-    private final int JUMP_INDEX = 2;           //跳转至首页
-
-
-
-
 
     private Handler mHandler = new Handler(){
         @Override
@@ -72,16 +72,18 @@ public class SplashActivity extends Activity {
                 case JUMP_LOGIN:
                     startActivity(new Intent(mContext,LoginActivity.class));
                     break;
-                case JUMP_INDEX:
+                case HandlerCode.HTTP_LOGIN_SUC:
                     Intent intent1 = new Intent(mContext, WebSocketService.class);
-                    //intent1.putExtra("")
                     startService(intent1);
                     Intent intent = new Intent(mContext, IndexActivity.class);
                     Bundle bundle=new Bundle();
                     bundle.putSerializable("userBean",mUserBean);
                     intent.putExtras(bundle);
                     startActivity(intent);
+                    initNetworkData();
                     break;
+                case HandlerCode.HTTP_INIT_SUC:
+                    GlobalApplication.setFriends(mInitData.getFriends());
                 default:
                     break;
 
@@ -100,8 +102,8 @@ public class SplashActivity extends Activity {
 
 
         initUi();
-        initData();
-        //initImageLoader();
+        // 根据包的版本号获取服务器地址
+        initService();
     }
 
 
@@ -109,10 +111,6 @@ public class SplashActivity extends Activity {
     private void initUi() {
         tv_version = (TextView) findViewById(R.id.tv_version);
         text_load_des = (TextView) findViewById(R.id.text_load_des);
-    }
-    private void initData() {
-        // 根据包的版本号获取服务器地址
-        initService();
     }
 
     private void initService() {
@@ -151,20 +149,6 @@ public class SplashActivity extends Activity {
     }
 
 
-
-    //ImageLoaderConfiguration
-    private void initImageLoader() {
-        ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(this);
-        config.threadPriority(Thread.NORM_PRIORITY - 2);
-        config.denyCacheImageMultipleSizesInMemory();
-        config.diskCacheFileNameGenerator(new Md5FileNameGenerator());
-        config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
-        config.tasksProcessingOrder(QueueProcessingType.LIFO);
-
-
-        ImageLoader.getInstance().init(config.build());
-    }
-
     // 检查是否需要自动登录
     private void autoLogin(){
         String name = SpUtil.getString(mContext, SpConstant.LOCAL_USER_NAME,"");
@@ -181,8 +165,8 @@ public class SplashActivity extends Activity {
                     super.onSuccess(resultType);
                     mUserBean =resultType.getUser();
                     SelfConstant.setUserBean(resultType.getUser());
-
-                    mHandler.sendEmptyMessage(JUMP_INDEX);
+                    mHandler.sendEmptyMessage(HandlerCode.HTTP_LOGIN_SUC);
+                    //mHandler.sendEmptyMessage(JUMP_INDEX);
                 }
 
                 @Override
@@ -208,6 +192,28 @@ public class SplashActivity extends Activity {
 
     }
 
+    private void initNetworkData() {
+        HttpUtil.syncPost(getApplication(), UrlConstant.getInstance().init(), null, new HttpCallback<InitData>() {
+            @Override
+            public void onSuccess(InitData resultType) {
+                mInitData = resultType;
+
+                mHandler.sendEmptyMessage(HandlerCode.HTTP_INIT_SUC);
+            }
+
+            @Override
+            public void onError(Throwable throwable, boolean b) {
+
+                super.onError(throwable, b);
+            }
+
+            @Override
+            public void onFinished() {
+                super.onFinished();
+            }
+        });
+
+    }
 
 
     @Override

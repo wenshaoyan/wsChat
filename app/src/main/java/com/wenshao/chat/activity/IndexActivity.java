@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,11 +19,18 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.wenshao.chat.R;
+import com.wenshao.chat.bean.MessageBean;
+import com.wenshao.chat.bean.RecentContactBean;
 import com.wenshao.chat.bean.UserBean;
 import com.wenshao.chat.fragment.ContactFragment;
 import com.wenshao.chat.fragment.DynamicFragment;
 import com.wenshao.chat.fragment.MessageFragment;
+import com.wenshao.chat.helper.GlobalApplication;
+import com.wenshao.chat.listener.WsEventListener;
+import com.wenshao.chat.receiver.NewMessageReceiver;
 import com.wenshao.chat.util.ToastUtil;
+
+import static com.wenshao.chat.R.id.rv_message_list;
 
 /**
  * Created by wenshao on 2017/3/17.
@@ -37,6 +45,7 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
     private ContactFragment mContactFragment;
     private DynamicFragment mDynamicFragment;
     private Toolbar mToolbar;
+    private NewMessageReceiver mNewMessageReceiver;
 
     private UserBean mUserBean;
 
@@ -51,8 +60,10 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
 
         initUi();
         initFragment();
+        initReceiver();
 
     }
+
 
     private void initUi() {
         tn_navigation_bar = (BottomNavigationBar) findViewById(R.id.tn_navigation_bar);
@@ -79,6 +90,19 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
 
     }
 
+    // 初始化广播接听事件
+    private void initReceiver() {
+        mNewMessageReceiver = new NewMessageReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.wenshao.chat.newMsg");
+        intentFilter.addAction("com.wenshao.chat.onReconnect");
+        intentFilter.addAction("com.wenshao.chat.responseMsg");
+        registerReceiver(mNewMessageReceiver, intentFilter);
+        mNewMessageReceiver.setOnWsEventListener(new IndexActivity.ChatWsEventListener());
+
+    }
+
+
     @Override
     public void onCreateCustomToolBar(Toolbar toolbar) {
         super.onCreateCustomToolBar(toolbar);
@@ -90,6 +114,7 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mNewMessageReceiver);
 
     }
 
@@ -210,4 +235,21 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
         });*/
     }
 
+    public class ChatWsEventListener extends WsEventListener {
+        @Override
+        public void reconnect() {
+
+        }
+        @Override
+        public void newMsg(MessageBean messageBean) {
+            super.newMsg(messageBean);
+            UserBean userBean = GlobalApplication.getAllUsers().get(messageBean.getSend_id());
+            if (userBean!=null){
+                RecentContactBean recentContactBean = new RecentContactBean(messageBean,1);
+                recentContactBean.setUserBean(userBean);
+                GlobalApplication.addRecentContact(recentContactBean);
+            }
+
+        }
+    }
 }
