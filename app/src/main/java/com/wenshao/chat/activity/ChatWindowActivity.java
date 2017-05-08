@@ -42,12 +42,15 @@ import com.wenshao.chat.R;
 import com.wenshao.chat.adapter.ChatMessageAdapter;
 import com.wenshao.chat.adapter.FaceVPAdapter;
 import com.wenshao.chat.adapter.SmallFaceAdapter;
+import com.wenshao.chat.bean.DaoSession;
 import com.wenshao.chat.bean.FileUploadBean;
 import com.wenshao.chat.bean.FileUploadData;
 import com.wenshao.chat.bean.RecentContactBean;
 import com.wenshao.chat.bean.MessageBean;
 import com.wenshao.chat.bean.MessageData;
+import com.wenshao.chat.bean.RecentContactBeanDao;
 import com.wenshao.chat.bean.UserBean;
+import com.wenshao.chat.constant.HandlerCode;
 import com.wenshao.chat.constant.SelfConstant;
 import com.wenshao.chat.constant.UrlConstant;
 import com.wenshao.chat.helper.BaseWebSocketClient;
@@ -67,6 +70,7 @@ import com.wenshao.chat.view.CirclePlayProgress;
 import com.wenshao.chat.view.CustomEditText;
 import com.wenshao.chat.view.CustomRelativeLayout;
 
+import org.greenrobot.greendao.query.QueryBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -119,14 +123,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
     private int mLastPosition = 0;
 
-    private static final int NETWORK_INIT_LOAD_SUC = 0x01;
-    private static final int NETWORK_INIT_LOAD_ERROR = 0x02;
-
-    private static final int LOCAL_INIT_LOAD_SUC = 0x11;
-    private static final int LOCAL_INIT_LOAD_ERROR = 0x12;
-
-    private static final int SOCKET_NEW_MSG = 0x21;
-
 
     private boolean isKeyboardShow = true;
     private AudioRecordUtil mAudioRecord;
@@ -139,7 +135,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case NETWORK_INIT_LOAD_SUC:
+                case HandlerCode.HTTP_REQUEST_SUC:
                     mChatMessageAdapter.replaceAll(messageBeanList);
                     mLastPosition = mChatMessageAdapter.getItemCount() - 1;
                     LinearLayoutManager layoutManager = (LinearLayoutManager) rv_message_list.getLayoutManager();
@@ -150,9 +146,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                     }
                     showKeyboard(et_message);
                     isKeyboardShow = true;
-                    break;
-                case SOCKET_NEW_MSG:
-
                     break;
 
 
@@ -178,8 +171,9 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
         // 图片选择多选触发事件
         getMultiListener();
-
         initDialog();
+        // 清除未读的消息
+        cleanUnread();
 
 
     }
@@ -222,7 +216,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
         rv_message_list = (RecyclerView) findViewById(R.id.rv_message_list);
         //  在onCreate需要指定RecyclerView的Adapter  否则会报No adapter attached; skipping layout
-        mChatMessageAdapter = new ChatMessageAdapter(mContext,getProxy());
+        mChatMessageAdapter = new ChatMessageAdapter(mContext, getProxy());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         //linearLayoutManager.setReverseLayout(true);  // 顺序反转
         //linearLayoutManager.setStackFromEnd(true);
@@ -350,7 +344,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         @Override
         public void newMsg(MessageBean messageBean) {
             super.newMsg(messageBean);
-            if (mReceiveUserBean.getUser_id().equals(messageBean.getSend_id())){
+            if (mReceiveUserBean.getUser_id().equals(messageBean.getSend_id())) {
                 messageBean.setUserBean(mReceiveUserBean);
                 messageBean.setLocation(MessageBean.LOCATION_LEFT);
                 mChatMessageAdapter.add(messageBean);
@@ -359,9 +353,10 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             }
 
         }
+
         @Override
         public void responseMsg(String str) {
-            Log.i(TAG, "responseMsg: "+str);
+            Log.i(TAG, "responseMsg: " + str);
             super.responseMsg(str);
         }
     }
@@ -377,14 +372,14 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                 super.onSuccess(resultType);
                 resultType.integration();
                 messageBeanList = resultType.getMessageList();
-                mHandler.sendEmptyMessage(NETWORK_INIT_LOAD_SUC);
+                mHandler.sendEmptyMessage(HandlerCode.HTTP_REQUEST_SUC);
 
             }
 
             @Override
             public void onError(Throwable throwable, boolean b) {
                 super.onError(throwable, b);
-                mHandler.sendEmptyMessage(NETWORK_INIT_LOAD_ERROR);
+                mHandler.sendEmptyMessage(HandlerCode.HTTP_REQUEST_FAIL);
             }
         });
     }
@@ -468,7 +463,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         mAudioRecord = new AudioRecordUtil(audioPath, tv_timer, cpp_record_play);
 
 
-
         mAudioRecord.setOnPlayPressListener(new AudioRecordUtil.OnPlayEventListener() {
             @Override
             public void onPlayAutoEnd() {
@@ -478,6 +472,21 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
             }
         });
 
+
+    }
+
+    private void cleanUnread() {
+        DaoSession ds = GlobalApplication.getDaoInstant();
+        List<RecentContactBean> list = ds.getRecentContactBeanDao()
+                .queryBuilder()
+                .where(RecentContactBeanDao.Properties.User_id.eq(mReceiveUserBean.getUser_id()))
+                .limit(1)
+                .list();
+        if (list.size()>0){
+            RecentContactBean recentContactBean = list.get(0);
+            recentContactBean.setUnreadNumber(0);
+            ds.update(recentContactBean);
+        }
 
     }
 
@@ -550,6 +559,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "onDestroy: ;;;;");
         unregisterReceiver(mNewMessageReceiver);
         GlobalApplication.getProxy(getApplicationContext()).unregisterCacheListener(this);
 
@@ -787,7 +797,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         MessageBean messageBean = new MessageBean();
         messageBean.setLocation(MessageBean.LOCATION_RIGHT);
         messageBean.setType(MessageBean.TYPE_AUDIO);
-        messageBean.setContent("file://"+fileUploadBean.getOriginalPath());
+        messageBean.setContent("file://" + fileUploadBean.getOriginalPath());
         messageBean.setUserBean(SelfConstant.getUserBean());
         messageBean.setSend_id(SelfConstant.getUserBean().getUser_id());
         messageBean.setSendCode(fileUploadBean.getSendCode());
@@ -827,7 +837,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         String Url = messageBean.getContent();
         String content;
         String type = messageBean.getType();
-        if (messageBean.getCreate_time()==0){
+        if (messageBean.getCreate_time() == 0) {
             messageBean.setCreate_time(new Date().getTime());
 
         }
@@ -838,10 +848,10 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
 
 
         try {
-            if ((MessageBean.TYPE_AUDIO.equals(type) || MessageBean.TYPE_IMAGE.equals(type) )&&"http".equals(Url.substring(0,4))){
-                content= new URL(Url).getPath();
-            }else{
-                content=Url;
+            if ((MessageBean.TYPE_AUDIO.equals(type) || MessageBean.TYPE_IMAGE.equals(type)) && "http".equals(Url.substring(0, 4))) {
+                content = new URL(Url).getPath();
+            } else {
+                content = Url;
             }
             jsonObject.put("receive_id", messageBean.getReceive_id());
             jsonObject.put("type", messageBean.getType());
@@ -901,6 +911,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         mFaceHelper.delete(et_message.getText());
         Log.i(TAG, "onBackspacePressed: " + et_message.getText().toString());
     }
+
     private HttpProxyCacheServer getProxy() {
         return GlobalApplication.getProxy(getApplicationContext());
     }
@@ -910,10 +921,10 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         List<MessageBean> dataList = mChatMessageAdapter.getDataList();
         MessageBean messageBean = dataList.get(position);
         if (MessageBean.TYPE_AUDIO.equals(messageBean.getType())) {  // 点击了语音类型的消息
-            Log.i(TAG, "onMessageItemClick: "+messageBean.getContent());
-        } else if (MessageBean.TYPE_TEXT.equals(messageBean.getType())){
+            Log.i(TAG, "onMessageItemClick: " + messageBean.getContent());
+        } else if (MessageBean.TYPE_TEXT.equals(messageBean.getType())) {
 
-        } else if (MessageBean.TYPE_IMAGE.equals(messageBean.getType())){
+        } else if (MessageBean.TYPE_IMAGE.equals(messageBean.getType())) {
 
         }
     }

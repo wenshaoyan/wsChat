@@ -3,6 +3,7 @@ package com.wenshao.chat.fragment;
 import android.app.Fragment;
 import android.content.Context;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,11 +13,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.wenshao.chat.R;
+import com.wenshao.chat.activity.ChatWindowActivity;
 import com.wenshao.chat.adapter.MessageAdapter;
 import com.wenshao.chat.bean.RecentContactBean;
+import com.wenshao.chat.bean.UserBean;
 import com.wenshao.chat.constant.HandlerCode;
 import com.wenshao.chat.helper.GlobalApplication;
 
@@ -53,6 +57,7 @@ public class MessageFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (msg.what == HandlerCode.LOCAL_QUERY_SUC) {
                 MessageAdapter messageAdapter = new MessageAdapter(mContext, recentContactBeanList, spl_refresh);
                 GlobalApplication.setRecentContactsAdapter(messageAdapter);
+
                 lv_message.setAdapter(messageAdapter);
             } else if (msg.what == DOWN_REFRESH_SUC) {
                 spl_refresh.setRefreshing(false);
@@ -98,7 +103,6 @@ public class MessageFragment extends Fragment implements SwipeRefreshLayout.OnRe
         return rootView;
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
@@ -116,6 +120,18 @@ public class MessageFragment extends Fragment implements SwipeRefreshLayout.OnRe
         spl_refresh.setOnRefreshListener(this);
         spl_refresh.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
                 android.R.color.holo_orange_light, android.R.color.holo_red_light);
+        lv_message.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(mContext, ChatWindowActivity.class);
+                UserBean userBean = recentContactBeanList.get(position).getUserBean();
+                Bundle bundle=new Bundle();
+                bundle.putSerializable("userBean",userBean);
+                intent.putExtras(bundle);
+                startActivity(intent);
+
+            }
+        });
 
     }
 

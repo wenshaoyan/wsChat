@@ -90,7 +90,7 @@ public class RecentContactBean {
     }
     public String getLastTimeString(){
 
-        return TimeUtil.getNewChatTime(getLastTime());
+        return TimeUtil.getNewChatShortTime(getLastTime());
     }
 
     public void setLastTime(long lastTime) {

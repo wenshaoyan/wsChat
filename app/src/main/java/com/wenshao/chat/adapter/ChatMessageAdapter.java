@@ -161,7 +161,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         @Override
         void setData(MessageBean messageBean) {
             super.setData(messageBean);
-            String imageUrl = "http://123.207.55.204:8081/image/20111130111800760.jpg";
+            String imageUrl = messageBean.getUserBean().getHead();
             mImageLoader.displayImage(imageUrl, rw_head, mOptions);
             if (messageBean.getType().equals(MessageBean.TYPE_TEXT)) {
                 SpannableStringBuilder sb = FaceHelper.imageToGif(tv_content, messageBean.getContent());
@@ -244,7 +244,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         @Override
         void setData(MessageBean messageBean) {
             super.setData(messageBean);
-            String imageUrl = "http://123.207.55.204:8081/image/20111130111800760.jpg";
+            String imageUrl = messageBean.getUserBean().getHead();
             mImageLoader.displayImage(imageUrl, rw_head, mOptions);
             if (messageBean.getType().equals(MessageBean.TYPE_TEXT)) {
                 SpannableStringBuilder sb = FaceHelper.imageToGif(tv_content, messageBean.getContent());
