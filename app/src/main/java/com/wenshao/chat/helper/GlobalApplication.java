@@ -104,6 +104,9 @@ public class GlobalApplication extends Application {
             mMessageAdapter.add(recentContactBean);
         }
     }
+    public static void clearUnreadNumber(RecentContactBean recentContactBean){
+        mMessageAdapter.clearUnreadNumber(recentContactBean);
+    }
 
     public static void setFriends(List<FriendBean> friends) {
 

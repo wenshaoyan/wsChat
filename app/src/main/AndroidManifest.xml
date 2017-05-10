@@ -6,7 +6,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -46,6 +47,9 @@
             android:name=".activity.ImageActivity"
             android:theme="@style/IndexTheme" />
         <activity
+            android:name=".activity.AppendFriendsActivity"
+            android:theme="@style/IndexTheme" />
+        <activity
             android:name="cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -54,7 +58,9 @@
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FinalTheme.Index" />
-        <activity android:name=".activity.TestActivity" android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".activity.TestActivity"
+            android:theme="@style/AppTheme" />
 
     </application>
 

@@ -484,8 +484,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                 .list();
         if (list.size()>0){
             RecentContactBean recentContactBean = list.get(0);
-            recentContactBean.setUnreadNumber(0);
-            ds.update(recentContactBean);
+            GlobalApplication.clearUnreadNumber(recentContactBean);
         }
 
     }
@@ -559,7 +558,6 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "onDestroy: ;;;;");
         unregisterReceiver(mNewMessageReceiver);
         GlobalApplication.getProxy(getApplicationContext()).unregisterCacheListener(this);
 

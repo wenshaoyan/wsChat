@@ -83,6 +83,13 @@ public class MessageAdapter extends BaseAdapter {
             notifyDataSetChanged();
         }
 
+    }
+    public void clearUnreadNumber(RecentContactBean recentContactBean) {
+        if (recentContactBeanList != null) {
+            recentContactBean.setUnreadNumber(0);
+            GlobalApplication.getDaoInstant().getRecentContactBeanDao().update(recentContactBean);
+            notifyDataSetChanged();
+        }
 
     }
 

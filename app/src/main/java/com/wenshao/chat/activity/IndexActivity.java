@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
@@ -63,6 +64,8 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
         initReceiver();
 
     }
+
+
 
 
     private void initUi() {
@@ -139,7 +142,6 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
 
     @Override
     public void onTabSelected(int position) {
-        Log.d(TAG, "onTabSelected() called with: " + "position = [" + position + "]");
         FragmentManager fm = getFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
         switch (position) {
@@ -212,6 +214,15 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
     private void showToolbarContact() {
         mToolbar.removeAllViews();
         getLayoutInflater().inflate(R.layout.toobar_contact, mToolbar);
+        TextView tv_add = (TextView) mToolbar.findViewById(R.id.tv_add);
+        if (tv_add!=null){
+            tv_add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(mContext,AppendFriendsActivity.class));
+                }
+            });
+        }
 
 
     }

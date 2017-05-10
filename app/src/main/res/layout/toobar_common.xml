@@ -7,30 +7,34 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="15dp">
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center_vertical">
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:riv_border_color="#333333"
-            app:riv_border_width="2dp"
-            app:riv_oval="true"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_message"
+            android:gravity="center"
             android:layout_centerVertical="true"
-            android:id="@+id/rw_current_user_head"/>
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:drawableLeft="@mipmap/ic_action_arrow_left_single"
+            android:drawableStart="@mipmap/ic_action_arrow_left_single"
+            android:id="@+id/tv_common_back" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:text="@string/text_contact"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
-
-            android:id="@+id/tv_title"/>
+            android:id="@+id/tv_common_center"
+            android:lines="1"
+            android:ellipsize="end"/>
 
         <TextView
-            android:id="@+id/tv_add"
+            android:id="@+id/tv_common_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -38,7 +42,6 @@
             android:layout_marginRight="5dp"
             android:layout_marginEnd="5dp"
             android:layout_centerInParent="true"
-            android:text="@string/text_add"
             android:textColor="@color/white"
             android:textSize="18sp"/>
     </RelativeLayout>
