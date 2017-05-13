@@ -1,6 +1,7 @@
 package com.wenshao.chat.activity;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -46,6 +47,7 @@ public class AppendFriendsActivity extends ToolBarActivity {
         inflater.inflate(R.layout.tab_friends, mTabHost.getTabContentView());
         inflater.inflate(R.layout.tab_group, mTabHost.getTabContentView());
         inflater.inflate(R.layout.tab_public, mTabHost.getTabContentView());
+
 
         mTabHost.addTab(mTabHost.newTabSpec("tab01")
                 .setIndicator("好友")
@@ -96,5 +98,11 @@ public class AppendFriendsActivity extends ToolBarActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy: ");
     }
 }

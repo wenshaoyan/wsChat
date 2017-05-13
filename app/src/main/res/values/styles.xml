@@ -87,5 +87,9 @@
         <item name="android:backgroundDimAmount">0.2</item>
 
     </style>
+    <style name="MyEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">#bf6439</item>
+    </style>
 
 </resources>

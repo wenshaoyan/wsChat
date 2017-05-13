@@ -78,9 +78,9 @@ public class IndexActivity extends ToolBarActivity implements BottomNavigationBa
         tn_navigation_bar.setBarBackgroundColor(R.color.white);
 
         tn_navigation_bar
-                .addItem(new BottomNavigationItem(R.mipmap.ic_action_monolog, "消息"))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_action_user, "联系人"))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_action_star_10, "动态"))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_action_monolog_white, "消息"))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_action_user_white, "联系人"))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_action_star_10_white, "动态"))
                 .initialise();
         tn_navigation_bar.setTabSelectedListener(this);
         setDefaultFragment();
