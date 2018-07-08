@@ -61,6 +61,10 @@
         <activity
             android:name=".activity.TestActivity"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".activity.CalculatorActivity"
+            android:theme="@style/IndexTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
 
     </application>
 

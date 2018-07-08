@@ -45,6 +45,13 @@
             <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:id="@+id/ib_calculator"
+                android:src="@mipmap/ic_action_calculator_holo"
+                android:background="@null"
+                android:layout_weight="1" />
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:id="@+id/ib_voice"
                 android:src="@mipmap/ic_action_mic_holo"
                 android:background="@null"

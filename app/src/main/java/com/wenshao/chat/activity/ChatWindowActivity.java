@@ -189,6 +189,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         ImageButton ib_camera = (ImageButton) findViewById(R.id.ib_camera);
         ImageButton ib_emo = (ImageButton) findViewById(R.id.ib_face);
         ImageButton ib_more = (ImageButton) findViewById(R.id.ib_more);
+        ImageButton ib_calculator = (ImageButton) findViewById(R.id.ib_calculator);
 
 
         ib_voice.setOnClickListener(this);
@@ -196,6 +197,7 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
         ib_camera.setOnClickListener(this);
         ib_emo.setOnClickListener(this);
         ib_more.setOnClickListener(this);
+        ib_calculator.setOnClickListener(this);
 
 
         face_container = (LinearLayout) findViewById(R.id.face_container);
@@ -695,9 +697,11 @@ public class ChatWindowActivity extends ToolBarActivity implements TextView.OnEd
                 break;
             case R.id.ib_more:
                 break;
-            case ib_start_intercom: // 对讲开始录音
+            case R.id.ib_calculator:
+                startActivity(new Intent(mContext,CalculatorActivity.class));
+                break;
+            case R.id.ib_start_intercom: // 对讲开始录音
                 startRecord(view);
-
 
             default:
                 break;
