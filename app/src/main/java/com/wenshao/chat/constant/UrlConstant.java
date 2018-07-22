@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class UrlConstant {
     // 配置服务器地址
-    private final static String SERVICE_ADDRESS ="http://123.207.55.204:8081";
+    private final static String SERVICE_ADDRESS ="http://127.0.0.1:8080";
 
     // 获取请求服务器地址
     public final static String GET_ADDRESS = SERVICE_ADDRESS+"/config/get";
@@ -34,8 +34,8 @@ public class UrlConstant {
 
 
     private static final UrlConstant urlConstant = new UrlConstant();
-    private static String serviceUrl;
-    private static String webSocketUrl;
+    private static String serviceUrl = "http://192.168.0.106:8080";
+    private static String webSocketUrl = "ws://192.168.0.106:3001";
 
 
 

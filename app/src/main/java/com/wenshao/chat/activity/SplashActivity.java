@@ -114,7 +114,7 @@ public class SplashActivity extends Activity {
     }
 
     private void initService() {
-        Map<String, String> params = PhoneInfo.getAll(mContext);
+        /*Map<String, String> params = PhoneInfo.getAll(mContext);
         params.put("environment", EnvConstant.ENVIRONMENT);
         HttpUtil.getAddress(getApplication(), UrlConstant.GET_ADDRESS,params,new HttpCallback<ServiceAddressData>(){
             @Override
@@ -145,7 +145,9 @@ public class SplashActivity extends Activity {
                 mHandler.sendEmptyMessage(INIT_SERVICE_FINISHED);
 
             }
-        });
+        });*/
+        mHandler.sendEmptyMessage(INIT_SERVICE_FINISHED);
+
     }
 
 
